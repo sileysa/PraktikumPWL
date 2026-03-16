@@ -20,17 +20,12 @@ class UserForm
                 TextInput::make('email')
                     ->email()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(),
                 TextInput::make('password')
                     ->password()
-                    ->required(),
-                Select::make('role')
-                    ->options([
-                        'admin' => 'Admin',
-                        'seller' => 'Seller',
-                        'buyer' => 'Buyer',
-                    ])
-                    ->required(),
+                    ->required()
+                    ->minLength(6),
             ]);
     }
 }
