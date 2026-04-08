@@ -7,11 +7,12 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\MarkdownEditor;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
 
 class PostForm
 {
@@ -19,26 +20,80 @@ class PostForm
     {
         return $schema
             ->components([
-                //
-                TextInput::make("title")
-                    ->required()
-                    ->minLength(5),
-                TextInput::make("slug")
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Select::make("category_id")
-                    ->relationship("category", "name")
-                    ->preload()
-                    ->searchable(),
-                ColorPicker::make("color"),
-                MarkdownEditor::make("content"),
-                // RichEditor::make("content"),
-                FileUpload::make("image")
-                    ->disk("public")
-                    ->directory("posts"),
-                TagsInput::make("tags"),
-                Checkbox::make("published"),
-                DateTimePicker::make("published_at"),
-            ]);
+
+                //KIRI (2/3)
+                Group::make([
+                    Section::make("Post Details")
+                        ->description("Fill in the details of the post")
+                        ->icon('heroicon-o-document-text')
+                        ->schema([
+
+                            //2 kolom
+                            Group::make([
+                                TextInput::make("title")
+                                    ->rules('required')
+                                    ->rules('required | min:5 | max:100')
+                                    ->validationMessages([
+                                        "required" => "Title is required.",
+                                        "min" => "Title must be at least 5 characters.",
+                                        "max" => "Title must not exceed 100 characters.",
+                                    ]),
+
+                                TextInput::make("slug")
+                                    ->rules('required | min:3 | max:10')
+                                    ->unique()
+                                    ->validationMessages([
+                                        "unique" => "Slug must be unique.",
+                                    ]),
+
+                                Select::make("category_id")
+                                    ->relationship("category", "name")
+                                    ->rules('required')
+                                    ->preload()
+                                    ->searchable()
+                                    ->validationMessages([
+                                        "required" => "Category is required.",
+                                    ]),
+                                    
+
+                                ColorPicker::make("color"),
+                            ])->columns(2),
+
+                            //full width
+                            MarkdownEditor::make("content")
+                                ->columnSpanFull(),
+
+                        ])
+                ])->columnSpan(2),
+
+                //KANAN (1/3)
+                Group::make([
+
+                    Section::make("Image Upload")
+                        ->icon('heroicon-o-photo')
+                        ->schema([
+                            FileUpload::make("image")
+                                ->rules('required')
+                                ->disk("public")
+                                ->directory("posts")
+                                ->validationMessages([
+                                    "required" => "Image is required.",
+                                ])
+                        ]),
+                        
+
+                    Section::make("Meta Information")
+                        ->icon('heroicon-o-information-circle')
+                        ->schema([
+                            TagsInput::make("tags"),
+                            Checkbox::make("published"),
+                            DateTimePicker::make("published_at"),
+                        ])
+                        ->columns(2),
+
+                ])->columnSpan(1),
+
+            ])
+            ->columns(3); 
     }
 }
